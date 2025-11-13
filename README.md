@@ -1,166 +1,288 @@
-# Stock Portfolio Tracker with Basket Rebalancing
+# 📈 Stock Portfolio Tracker
 
-Track your stock portfolio performance over time with support for rebalancing across multiple baskets. Compare your returns against the S&P 500 benchmark.
+Interactive portfolio tracking with basket rebalancing, performance analytics, and S&P 500 benchmarking.
 
-## Features
-
-- **Multiple Basket Support**: Track portfolio performance across different stock selections over time
-- **Rollover Returns**: Automatically calculates cumulative returns when transitioning between baskets
-- **Benchmark Comparison**: Compare your portfolio against S&P 500 performance
-- **Interactive Input**: Easy-to-use prompts for entering baskets and dates
-- **Configuration Files**: Save and load portfolio configurations for repeated analysis
-- **Professional Visualization**: Charts with transition markers, performance metrics, and annotations
-
-## Installation
-
-1. Install dependencies:
-```bash
-pip install -r requirements.txt
-```
-
-2. Set up your API keys:
-   - Copy `.env.template` to `.env`
-   - Add your NASDAQ Data Link API key (required)
-   - Add your FRED API key (optional, for S&P 500 benchmark)
+## 🚀 Quick Start
 
 ```bash
-cp .env.template .env
-# Edit .env and add your keys
+# 1. Clone and setup
+git clone <your-repo-url>
+cd stock
+
+# 2. Configure API keys
+cp config/.env.template .env
+# Edit .env and add your API keys
+
+# 3. Run the dashboard
+./portfolio dashboard
 ```
 
-## Usage
+The dashboard will open at `http://localhost:8501`
 
-### Interactive Mode
+## ✨ Features
 
-Run the script and follow the prompts:
+### Interactive Web Dashboard
+- **Live Basket Editing** - Add/remove/modify baskets with custom tickers and timeframes
+- **Interactive Charts** - Plotly-powered charts with zoom, pan, and hover details
+- **Portfolio Comparison** - Compare 2-5 portfolios side-by-side
+- **Advanced Metrics** - Sharpe ratio, max drawdown, volatility, win rate
+- **Save/Load Configs** - Manage multiple portfolio strategies
+- **Data Export** - Download returns and metrics as CSV
+
+### Command-Line Interface
+- Batch processing for automation
+- Config file support (YAML)
+- Portfolio comparison mode
+- Chart generation
+
+## 📋 Requirements
+
+- Python 3.8+ (tested on 3.13)
+- NASDAQ Data Link API key ([sign up](https://data.nasdaq.com/sign-up))
+- FRED API key ([sign up](https://fred.stlouisfed.org/docs/api/api_key.html)) - optional
+
+## 🎯 Usage
+
+### Interactive Dashboard (Recommended)
 
 ```bash
-python portfolio_tracker.py
+./portfolio dashboard
 ```
 
-The script will ask you to:
-1. Enter stock tickers for each basket (comma-separated)
-2. Enter the start date for each basket
-3. Optionally add more baskets (for rebalancing)
-4. Enter the end date for analysis (or use today)
+Features:
+- Create portfolios with multiple baskets
+- Set custom start dates for each basket (rebalancing points)
+- Run analysis with one click
+- View performance metrics and charts
+- Save configurations for later use
+- Compare different strategies
 
-### Example Session
+### Command-Line Mode
+
+```bash
+# Interactive mode (prompts for input)
+./portfolio cli
+
+# Auto mode (load existing config)
+./portfolio cli --auto
+
+# Use specific config file
+./portfolio cli --config config/portfolio_config.example.yaml
+
+# Compare multiple portfolios
+./portfolio cli --compare portfolio1.yaml portfolio2.yaml
+```
+
+### Verify Setup
+
+```bash
+./portfolio test
+```
+
+## 📁 Project Structure
 
 ```
---- Basket 1 ---
-Enter stock tickers for basket 1: AAPL,MSFT,GOOGL
-Enter start date for basket 1 (YYYY-MM-DD): 2024-01-01
-
-Add another basket? (y/n): y
-
---- Basket 2 ---
-Enter stock tickers for basket 2: NVDA,AMD,TSM
-Enter transition date to basket 2 (YYYY-MM-DD): 2024-06-01
-
-Add another basket? (y/n): n
-
-Enter end date for analysis (YYYY-MM-DD, or press Enter for today): 2024-12-31
+stock/
+├── portfolio              # Unified launcher script
+├── .env                   # API keys (create from template)
+├── portfolio_config.yaml  # Your portfolio (auto-created)
+│
+├── src/                   # Source code
+│   ├── portfolio_tracker.py  # Core tracker logic
+│   └── dashboard.py           # Web dashboard
+│
+├── config/                # Example configurations
+│   ├── .env.template          # API keys template
+│   ├── portfolio_config.example.yaml
+│   └── portfolio_config_alt.yaml
+│
+├── docs/                  # Documentation
+│   ├── README.md              # Original README
+│   ├── QUICKSTART.md          # CLI quick start
+│   ├── DASHBOARD_README.md    # Complete dashboard guide
+│   └── DASHBOARD_QUICKSTART.md
+│
+├── bin/                   # Helper scripts (legacy)
+│   ├── start_dashboard.sh
+│   ├── run_dashboard.sh
+│   └── launch_dashboard.sh
+│
+├── tests/                 # Test utilities
+├── charts/                # Generated charts (gitignored)
+└── venv/                  # Virtual environment (auto-created)
 ```
 
-### Configuration File
+## 🎨 Configuration Format
 
-Save your portfolio configuration for repeated analysis:
+Create a YAML file with one or more baskets:
 
 ```yaml
 baskets:
+  # First basket - Tech stocks (Jan-May)
   - tickers: [AAPL, MSFT, GOOGL]
     start_date: "2024-01-01"
+
+  # Second basket - Semiconductors (Jun-Dec)
   - tickers: [NVDA, AMD, TSM]
     start_date: "2024-06-01"
-  - tickers: [META, AMZN]
-    start_date: "2024-09-01"
+
+# End date for analysis
 end_date: "2024-12-31"
 ```
 
-The script will automatically detect and offer to load `portfolio_config.yaml` if it exists.
+**Key Concepts:**
+- **Basket**: Group of stocks held for a specific period
+- **Rebalancing**: Portfolio transitions to next basket at its start_date
+- **Rollover Returns**: Gains/losses compound across basket transitions
 
-## How It Works
+## 📊 How It Works
 
-### Rollover Return Calculation
+1. **Equal-Weighted Baskets** - Each stock contributes equally to basket performance
+2. **Rollover Compounding** - Basket 1 ends at 115 → Basket 2 starts at 115 (not 100)
+3. **S&P 500 Benchmark** - Compare your strategy against the market
+4. **Advanced Metrics** - Risk-adjusted returns (Sharpe ratio), drawdowns, volatility
 
-When you transition from one basket to another, the script:
+## 🔧 Advanced Usage
 
-1. Calculates the equal-weighted return of Basket 1 from its start date to the transition date
-2. Applies this return to the initial portfolio value (100)
-3. Uses the ending value as the starting point for Basket 2
-4. Continues this process for all baskets
+### Custom Strategies
 
-**Example:**
-- Basket 1 (AAPL, MSFT): Jan 1 → Jun 1, gains 15%
-  - Portfolio: 100 → 115
-- Basket 2 (NVDA, AMD): Jun 1 → Dec 31, gains 20%
-  - Portfolio: 115 → 138
-- Total return: 38%
+**Sector Rotation:**
+```yaml
+baskets:
+  - tickers: [AAPL, MSFT, GOOGL]  # Q1: Tech
+    start_date: "2024-01-01"
+  - tickers: [JNJ, PFE, UNH]      # Q2: Healthcare
+    start_date: "2024-04-01"
+  - tickers: [XOM, CVX, COP]      # Q3: Energy
+    start_date: "2024-07-01"
+  - tickers: [JPM, BAC, GS]       # Q4: Finance
+    start_date: "2024-10-01"
+end_date: "2024-12-31"
+```
 
-### Equal-Weighted Baskets
+**Momentum Strategy:**
+```yaml
+baskets:
+  - tickers: [NVDA, AMD, SMCI]  # High momentum
+    start_date: "2024-01-01"
+  - tickers: [TSLA, META, AMZN] # Rebalance monthly
+    start_date: "2024-02-01"
+  # ... continue monthly
+end_date: "2024-12-31"
+```
 
-Each stock in a basket contributes equally to the basket's performance. This is calculated by:
+### Portfolio Comparison
 
-1. Normalizing each stock's price to 1.0 at the basket's start date
-2. Averaging the normalized prices across all stocks in the basket
-3. Applying the average performance to the portfolio value
+Create multiple configs and compare:
+```bash
+./portfolio dashboard
+# Select "Portfolio Comparison" mode
+# Choose 2-5 saved configurations
+# Click "Compare Portfolios"
+```
 
-## Output
+## 🛠️ Development
 
-The script generates:
+### Setup Development Environment
 
-1. **Console Output**:
-   - Download progress
-   - Basket-by-basket performance
-   - Final summary statistics
+```bash
+# Create virtual environment
+python3 -m venv venv
+source venv/bin/activate
 
-2. **Performance Chart** (`charts/portfolio_performance.png`):
-   - Portfolio value over time
-   - S&P 500 benchmark (if FRED API key provided)
-   - Vertical lines marking basket transitions
-   - Annotations showing which stocks were held in each period
-   - Metrics box with returns, annualized returns, and outperformance
+# Install dependencies
+pip install -r requirements.txt
+pip install setuptools  # Python 3.13+ compatibility
 
-## API Keys
+# Run tests
+python3 test_setup.py
+python3 test_dashboard_setup.py
+```
 
-### NASDAQ Data Link API Key (Required)
+### Running from Source
 
-Get your free API key at: https://data.nasdaq.com/sign-up
+```bash
+# Dashboard
+source venv/bin/activate
+streamlit run src/dashboard.py
 
-The free tier includes:
-- 50 API calls per day
-- Access to SHARADAR equity prices
-- Sufficient for most portfolio tracking needs
+# CLI
+python3 src/portfolio_tracker.py --auto
+```
 
-### FRED API Key (Optional)
+## 📚 Documentation
 
-Get your free API key at: https://fred.stlouisfed.org/docs/api/api_key.html
+- **[Quick Start](docs/QUICKSTART.md)** - Get started with CLI in 5 minutes
+- **[Dashboard Guide](docs/DASHBOARD_README.md)** - Complete dashboard documentation
+- **[Dashboard Quick Start](docs/DASHBOARD_QUICKSTART.md)** - Dashboard in 3 steps
+- **[CLAUDE.md](CLAUDE.md)** - Developer guide for Claude Code
 
-Used for fetching S&P 500 benchmark data.
+## 🤝 Contributing
 
-## Data Source
+This project uses:
+- **NASDAQ Data Link** - Stock price data
+- **FRED** - S&P 500 benchmark data
+- **Streamlit** - Interactive dashboards
+- **Plotly** - Interactive charts
+- **pandas** - Data processing
 
-Stock prices are sourced from NASDAQ Data Link (formerly Quandl) using the SHARADAR/SEP dataset, which provides:
-- Daily closing prices for all US equities
-- High-quality, survivorship-bias-free data
-- Historical data going back decades
+## 📄 License
 
-## Limitations
+MIT License - See LICENSE file for details
 
-- Requires NASDAQ Data Link subscription for comprehensive historical data
-- Equal-weighted baskets only (no custom position sizing)
-- Does not account for dividends, splits, or trading costs
-- Weekend/holiday prices are interpolated from benchmark data
+## 🙏 Acknowledgments
 
-## Future Enhancements
+- NASDAQ Data Link for stock price data
+- FRED for benchmark data
+- Streamlit for the amazing dashboard framework
 
-- Web application interface (Flask + Plotly)
-- Custom position sizing (dollar amounts per stock)
-- Dividend reinvestment modeling
-- Multiple portfolio comparison
-- Export to CSV/Excel
-- Real-time price updates
+## 💡 Tips
 
-## License
+1. **Start Simple** - Begin with 2 baskets, 3-5 tickers, 1-2 year period
+2. **Use Examples** - Check `config/` for ready-to-use configurations
+3. **Save Configs** - Name them descriptively (e.g., `tech_2024.yaml`, `value_stocks.yaml`)
+4. **Compare Strategies** - Test different approaches side-by-side
+5. **Export Data** - Download CSV for further analysis in Excel/Google Sheets
 
-MIT License - Feel free to modify and use as needed!
+## 🐛 Troubleshooting
+
+**"Module not found" errors:**
+```bash
+source venv/bin/activate
+pip install -r requirements.txt
+pip install setuptools
+```
+
+**API key errors:**
+```bash
+# Verify .env file exists
+cat .env
+
+# Should contain:
+# NASDAQ_DATA_LINK_API_KEY=your_key
+# FRED_API_KEY=your_key
+```
+
+**Dashboard won't start:**
+```bash
+# Kill any existing instances
+pkill -f "streamlit run"
+
+# Restart
+./portfolio dashboard
+```
+
+**Data fetching slow:**
+- First fetch: 30-60 seconds (normal)
+- Cached for 1 hour after that
+- More tickers = longer initial fetch
+
+## 📞 Support
+
+- Check documentation in `docs/`
+- Run `./portfolio test` to verify setup
+- See `CLAUDE.md` for development details
+
+---
+
+**Made with Claude Code** 🤖

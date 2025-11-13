@@ -1,0 +1,168 @@
+#!/usr/bin/env bash
+# Stock Portfolio Tracker - Unified Launcher
+# Usage: ./portfolio [command]
+
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR"
+
+# Colors for output
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+print_header() {
+    echo -e "${BLUE}╔════════════════════════════════════════════╗${NC}"
+    echo -e "${BLUE}║   📈 Stock Portfolio Tracker              ║${NC}"
+    echo -e "${BLUE}╚════════════════════════════════════════════╝${NC}"
+    echo ""
+}
+
+print_success() {
+    echo -e "${GREEN}✅ $1${NC}"
+}
+
+print_error() {
+    echo -e "${RED}❌ $1${NC}"
+}
+
+print_warning() {
+    echo -e "${YELLOW}⚠️  $1${NC}"
+}
+
+print_info() {
+    echo -e "${BLUE}ℹ️  $1${NC}"
+}
+
+check_env() {
+    if [ ! -f ".env" ]; then
+        print_error ".env file not found!"
+        echo ""
+        echo "Create .env file with your API keys:"
+        echo "  NASDAQ_DATA_LINK_API_KEY=your_key"
+        echo "  FRED_API_KEY=your_key"
+        echo ""
+        echo "See config/.env.template for reference"
+        exit 1
+    fi
+}
+
+setup_venv() {
+    if [ ! -d "venv" ]; then
+        print_info "Creating virtual environment..."
+        python3 -m venv venv
+        print_success "Virtual environment created"
+    fi
+
+    source venv/bin/activate
+
+    # Check if dependencies are installed
+    if ! python -c "import streamlit" 2>/dev/null; then
+        print_info "Installing dependencies..."
+        pip install -q --upgrade pip
+        pip install -q -r requirements.txt
+        pip install -q setuptools  # For Python 3.13 compatibility
+        print_success "Dependencies installed"
+    fi
+}
+
+cmd_dashboard() {
+    print_header
+    check_env
+    setup_venv
+
+    print_info "Starting interactive dashboard..."
+    echo ""
+    print_success "Dashboard will open at: http://localhost:8501"
+    echo ""
+    echo "Press Ctrl+C to stop"
+    echo ""
+
+    streamlit run src/dashboard.py --server.headless=true
+}
+
+cmd_cli() {
+    print_header
+    check_env
+    setup_venv
+
+    # Pass all arguments after 'cli' to the CLI tracker
+    shift
+    python3 src/portfolio_tracker.py "$@"
+}
+
+cmd_test() {
+    print_header
+    python3 test_setup.py
+}
+
+cmd_help() {
+    print_header
+    cat << EOF
+Usage: ./portfolio [command] [options]
+
+Commands:
+  dashboard          Start the interactive web dashboard (recommended)
+  cli [options]      Run the command-line tracker
+  test               Verify setup and API keys
+  help               Show this help message
+
+Dashboard Features:
+  • Live basket editing with custom timeframes
+  • Interactive Plotly charts (zoom, pan, hover)
+  • Save/load portfolio configurations
+  • Compare multiple portfolios side-by-side
+  • Advanced metrics dashboard
+  • Data export to CSV
+
+CLI Options:
+  --auto                Load existing portfolio_config.yaml
+  --config FILE         Use specific config file
+  --compare FILE1 FILE2 Compare multiple portfolios
+
+Examples:
+  ./portfolio dashboard                    # Start web dashboard
+  ./portfolio cli --auto                   # Run CLI with saved config
+  ./portfolio cli --config my_portfolio.yaml
+  ./portfolio test                         # Verify setup
+
+Documentation:
+  docs/DASHBOARD_README.md       - Complete dashboard guide
+  docs/DASHBOARD_QUICKSTART.md   - Quick start guide
+  docs/QUICKSTART.md             - CLI quick start
+  CLAUDE.md                      - Development guide
+
+Project Structure:
+  src/              - Python source code
+  bin/              - Helper scripts
+  config/           - Example configurations
+  docs/             - Documentation
+  tests/            - Test utilities
+
+EOF
+}
+
+# Main command router
+case "${1:-help}" in
+    dashboard|dash|web)
+        cmd_dashboard
+        ;;
+    cli|tracker)
+        cmd_cli "$@"
+        ;;
+    test|verify|check)
+        cmd_test
+        ;;
+    help|--help|-h)
+        cmd_help
+        ;;
+    *)
+        print_error "Unknown command: $1"
+        echo ""
+        echo "Run './portfolio help' for usage information"
+        exit 1
+        ;;
+esac

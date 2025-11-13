@@ -1,8 +1,10 @@
 # Environment files with API keys
 .env
 
-# Portfolio configuration (may contain personal data)
+# Portfolio configurations (may contain personal data)
 portfolio_config.yaml
+portfolio_config_*.yaml
+!config/portfolio_config*.yaml  # Keep example configs in config/
 
 # Generated charts
 charts/*.png
@@ -51,3 +53,11 @@ Thumbs.db
 *.csv
 *.xlsx
 *.parquet
+
+# Streamlit
+.streamlit/
+
+# Logs
+*.log
+bin/*.log
+logs/

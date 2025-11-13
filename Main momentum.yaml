@@ -1,0 +1,50 @@
+baskets:
+- start_date: '2025-01-01'
+  tickers:
+  - APP
+  - IDCC
+  - CVNA
+  - AXON
+  - RCL
+  - EH
+  - CSW
+  - CASY
+  - LII
+  - MCO
+- start_date: '2025-04-01'
+  tickers:
+  - TGTX
+  - IDCC
+  - EXEL
+  - APP
+  - DOCS
+  - UI
+  - TPR
+  - ALKS
+  - CVCO
+  - AXON
+- start_date: '2025-06-30'
+  tickers:
+  - EAT
+  - AXON
+  - APP
+  - IDCC
+  - HIMS
+  - UI
+  - LOPE
+  - TGTX
+  - SFM
+  - PAYC
+- start_date: '2025-10-01'
+  tickers:
+  - IDCC
+  - STX
+  - CLS
+  - APH
+  - UBER
+  - CASY
+  - UI
+  - TEL
+  - JNJ
+  - STRL
+end_date: '2025-11-12'

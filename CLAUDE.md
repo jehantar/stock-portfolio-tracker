@@ -6,41 +6,114 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Stock Portfolio Tracker with basket rebalancing - tracks portfolio performance across multiple time periods with different stock selections, calculating rollover returns and comparing against S&P 500 benchmark.
 
+## Project Structure
+
+```
+stock/
+├── portfolio              # Unified launcher script
+├── .env                   # API keys (gitignored)
+├── portfolio_config.yaml  # User's portfolio (gitignored)
+│
+├── src/                   # Python source code
+│   ├── portfolio_tracker.py   # Core tracker logic (CLI)
+│   └── dashboard.py            # Interactive web dashboard
+│
+├── config/                # Example configurations & templates
+│   ├── .env.template
+│   ├── portfolio_config.example.yaml
+│   └── portfolio_config_alt.yaml
+│
+├── docs/                  # Documentation
+│   ├── README.md (original)
+│   ├── QUICKSTART.md
+│   ├── DASHBOARD_README.md
+│   └── DASHBOARD_QUICKSTART.md
+│
+├── bin/                   # Helper scripts (legacy, use ./portfolio instead)
+├── tests/                 # Test utilities
+├── charts/                # Generated charts (gitignored)
+└── venv/                  # Virtual environment (auto-created, gitignored)
+```
+
 ## Development Commands
+
+### Unified Launcher (Recommended)
+
+```bash
+# Show help and available commands
+./portfolio help
+
+# Start interactive web dashboard
+./portfolio dashboard
+
+# Run CLI tracker
+./portfolio cli [options]
+
+# Verify setup
+./portfolio test
+```
 
 ### Setup and Testing
 ```bash
 # Verify setup (checks dependencies and API keys)
 python3 test_setup.py
 
+# Verify dashboard setup
+python3 test_dashboard_setup.py
+
 # Install dependencies
 pip install -r requirements.txt
+pip install setuptools  # Python 3.13+ compatibility
 ```
 
-### Running the Tracker
+### Running the Dashboard
 
 ```bash
-# Interactive mode (prompts for basket input)
-python3 portfolio_tracker.py
+# Using unified launcher (recommended)
+./portfolio dashboard
 
-# Auto mode (loads existing portfolio_config.yaml)
-python3 portfolio_tracker.py --auto
+# Or manually with Streamlit
+source venv/bin/activate
+streamlit run src/dashboard.py
+```
+
+The dashboard provides:
+- Live basket editing with custom timeframes
+- Interactive Plotly charts with zoom/pan/hover
+- Save/load portfolio configurations
+- Portfolio comparison (2-5 portfolios side-by-side)
+- Advanced metrics dashboard (Sharpe, drawdown, volatility)
+- Data export (CSV)
+
+See `docs/DASHBOARD_README.md` for detailed dashboard documentation.
+
+### Running the CLI Tracker
+
+```bash
+# Using unified launcher (recommended)
+./portfolio cli --auto
+
+# Interactive mode (prompts for basket input)
+./portfolio cli
 
 # Use custom config file
-python3 portfolio_tracker.py --config my_portfolio.yaml
+./portfolio cli --config config/portfolio_config.example.yaml
 
 # Compare multiple portfolios
-python3 portfolio_tracker.py --compare portfolio_config.yaml portfolio_config_alt.yaml
+./portfolio cli --compare portfolio1.yaml portfolio2.yaml
+
+# Or manually
+python3 src/portfolio_tracker.py --auto
 ```
 
 ### Testing Specific Features
 
 ```bash
-# Test with minimal config for debugging
-python3 portfolio_tracker.py --config portfolio_config.example.yaml --auto
+# Test with example config
+./portfolio cli --config config/portfolio_config.example.yaml --auto
 
 # Run with unbuffered output (useful for debugging)
-python3 -u portfolio_tracker.py --auto
+python3 -u src/portfolio_tracker.py --auto
 ```
 
 ## Architecture

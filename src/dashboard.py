@@ -553,9 +553,15 @@ def main():
     # Sidebar
     st.sidebar.title("Settings")
 
-    # API Keys
-    nasdaq_key = os.getenv('NASDAQ_DATA_LINK_API_KEY')
-    fred_key = os.getenv('FRED_API_KEY')
+    # API Keys - support both local .env and Streamlit Cloud secrets
+    try:
+        # Try Streamlit secrets first (for cloud deployment)
+        nasdaq_key = st.secrets.get("NASDAQ_DATA_LINK_API_KEY")
+        fred_key = st.secrets.get("FRED_API_KEY")
+    except (AttributeError, FileNotFoundError):
+        # Fall back to environment variables (for local development)
+        nasdaq_key = os.getenv('NASDAQ_DATA_LINK_API_KEY')
+        fred_key = os.getenv('FRED_API_KEY')
 
     if not nasdaq_key:
         st.error("⚠️ NASDAQ_DATA_LINK_API_KEY not found in .env file")

@@ -277,6 +277,30 @@ pkill -f "streamlit run"
 - Cached for 1 hour after that
 - More tickers = longer initial fetch
 
+## 🌐 Deployment
+
+### Deploy as Live Website (FREE!)
+
+Deploy your dashboard to Streamlit Community Cloud in under 5 minutes:
+
+1. Go to [share.streamlit.io](https://share.streamlit.io)
+2. Sign in with GitHub
+3. Click "New app"
+4. Select this repository: `jehantar/stock-portfolio-tracker`
+5. Set main file: `src/dashboard.py`
+6. Add your API keys in the Secrets section:
+```toml
+NASDAQ_DATA_LINK_API_KEY = "your_key"
+FRED_API_KEY = "your_key"
+```
+7. Click "Deploy"
+
+**Your dashboard will be live at: `https://your-app.streamlit.app`**
+
+📖 Full deployment guide: [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)
+
+**Security Note:** Your API keys are stored securely in Streamlit Cloud and are NOT exposed in your code or repository.
+
 ## 📞 Support
 
 - Check documentation in `docs/`

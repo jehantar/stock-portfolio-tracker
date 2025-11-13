@@ -43,10 +43,25 @@ st.set_page_config(
 # Custom CSS for compact styling
 st.markdown("""
 <style>
-    /* Reduce overall font sizes */
+    /* Reduce overall font sizes and top padding */
     .main .block-container {
-        padding-top: 2rem;
+        padding-top: 1rem !important;
         padding-bottom: 1rem;
+        max-width: 100%;
+    }
+
+    /* Remove Streamlit default toolbar space */
+    .stApp > header {
+        background-color: transparent;
+    }
+
+    section[data-testid="stSidebar"] {
+        top: 0;
+    }
+
+    /* Reduce top padding aggressively */
+    div[data-testid="stVerticalBlock"] > div:first-child {
+        padding-top: 0 !important;
     }
 
     .main-header {
@@ -54,6 +69,14 @@ st.markdown("""
         font-weight: bold;
         color: #1f77b4;
         margin-bottom: 0.3rem;
+        margin-top: 0 !important;
+        padding-top: 0 !important;
+    }
+
+    /* Target first element to remove top space */
+    .main .block-container > div:first-child {
+        padding-top: 0 !important;
+        margin-top: 0 !important;
     }
 
     /* Tighter spacing for all elements */
@@ -131,6 +154,16 @@ st.markdown("""
         border-radius: 0.5rem;
         padding: 0.75rem;
         margin: 0.3rem 0;
+    }
+
+    /* Make date input more compact */
+    .stDateInput {
+        max-width: 100%;
+    }
+
+    /* Align metrics in the header row */
+    div[data-testid="column"] .stMetric {
+        margin-top: 0;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -400,11 +433,13 @@ def basket_editor():
         end_date = st.date_input(
             "Portfolio End Date",
             value=pd.to_datetime(config.end_date),
-            key="end_date_input"
+            key="end_date_input",
+            format="MM/DD/YYYY"
         )
         config.end_date = end_date.strftime('%Y-%m-%d')
 
     with col2:
+        st.markdown("")  # Align with input field
         st.metric("Number of Baskets", len(config.baskets))
 
     # Basket editor
@@ -418,13 +453,14 @@ def basket_editor():
                         (f" +{len(basket.tickers)-3}" if len(basket.tickers) > 3 else ""),
                         expanded=(i == len(config.baskets) - 1)):
 
-            col1, col2, col3 = st.columns([3, 2, 1])
+            col1, col2 = st.columns([3, 2])
 
             with col1:
                 tickers_input = st.text_input(
                     "Tickers (comma-separated)",
                     value=', '.join(basket.tickers),
-                    key=f"basket_{i}_tickers"
+                    key=f"basket_{i}_tickers",
+                    label_visibility="visible"
                 )
                 basket.tickers = [t.strip().upper() for t in tickers_input.split(',') if t.strip()]
 
@@ -432,15 +468,15 @@ def basket_editor():
                 start_date = st.date_input(
                     "Start Date" if i == 0 else "Transition Date",
                     value=pd.to_datetime(basket.start_date),
-                    key=f"basket_{i}_start"
+                    key=f"basket_{i}_start",
+                    label_visibility="visible",
+                    format="MM/DD/YYYY"
                 )
                 basket.start_date = start_date.strftime('%Y-%m-%d')
 
-            with col3:
-                st.write("")  # Spacer
-                st.write("")  # Spacer
-                if st.button("🗑️ Remove", key=f"remove_basket_{i}"):
-                    baskets_to_remove.append(i)
+            # Remove button on its own row
+            if st.button("🗑️ Remove Basket", key=f"remove_basket_{i}", type="secondary"):
+                baskets_to_remove.append(i)
 
     # Remove baskets (after iteration to avoid modification during iteration)
     for i in reversed(baskets_to_remove):
@@ -510,8 +546,8 @@ def save_load_configs():
 def main():
     """Main dashboard application."""
 
-    # Header
-    st.markdown('<p class="main-header">📈 Stock Portfolio Tracker</p>', unsafe_allow_html=True)
+    # Header - with negative margin to reduce top space
+    st.markdown('<div style="margin-top: -4rem;"><p class="main-header" style="margin-top: 0; padding-top: 0;">📈 Stock Portfolio Tracker</p></div>', unsafe_allow_html=True)
     st.markdown("Interactive dashboard for portfolio analysis with basket rebalancing")
 
     # Sidebar

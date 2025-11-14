@@ -24,7 +24,6 @@ import requests
 import yaml
 import nasdaqdatalink as ndl
 from dotenv import load_dotenv
-from pandas_datareader import DataReader
 from fredapi import Fred
 
 
@@ -214,12 +213,10 @@ def download_nasdaq_prices(api_key: str, start_date: str, end_date: str,
 
 def download_sp500_benchmark(fred_api_key: str, start_date: str, end_date: str) -> pd.DataFrame:
     """
-    Download S&P 500 index data from FRED (daily data).
-
-    Mimics momentum/data/benchmarks.py
+    Download S&P 500 index data from FRED (daily data) using fredapi.
 
     Args:
-        fred_api_key: FRED API key (not used with pandas_datareader)
+        fred_api_key: FRED API key
         start_date: Start date (YYYY-MM-DD)
         end_date: End date (YYYY-MM-DD)
 
@@ -229,22 +226,26 @@ def download_sp500_benchmark(fred_api_key: str, start_date: str, end_date: str) 
     print(f"Downloading S&P 500 benchmark data from FRED...")
 
     try:
-        # Use pandas_datareader to get daily S&P 500 data from FRED
-        daily_data = DataReader('SP500', 'fred', start_date, end_date)
+        # Use fredapi to get daily S&P 500 data from FRED
+        fred = Fred(api_key=fred_api_key)
+        daily_data = fred.get_series('SP500', observation_start=start_date, observation_end=end_date)
 
         if daily_data.empty:
             print("Warning: No S&P 500 data returned")
             return pd.DataFrame(columns=['date', 'close'])
 
+        # Convert Series to DataFrame
+        daily_data = daily_data.to_frame(name='close')
+
         # Forward fill NaNs for holidays/weekends
-        daily_data['SP500'] = daily_data['SP500'].ffill()
+        daily_data['close'] = daily_data['close'].ffill()
 
         # Also backfill in case the first entries are NaN
-        daily_data['SP500'] = daily_data['SP500'].bfill()
+        daily_data['close'] = daily_data['close'].bfill()
 
-        # Reset index and rename columns
+        # Reset index to make date a column
         daily_data = daily_data.reset_index()
-        daily_data = daily_data.rename(columns={'DATE': 'date', 'SP500': 'close'})
+        daily_data = daily_data.rename(columns={'index': 'date'})
 
         # Ensure date column is datetime
         daily_data['date'] = pd.to_datetime(daily_data['date'])

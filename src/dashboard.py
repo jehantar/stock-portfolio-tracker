@@ -40,120 +40,100 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom CSS for compact styling
+# Custom CSS for zoomed-out, single-page view
 st.markdown("""
 <style>
-    /* Reduce overall font sizes and top padding */
+    /* Restore normal padding, zoom-out effect */
     .main .block-container {
-        padding-top: 1rem !important;
+        padding-top: 2rem !important;
         padding-bottom: 1rem;
         max-width: 100%;
-    }
-
-    /* Remove Streamlit default toolbar space */
-    .stApp > header {
-        background-color: transparent;
-    }
-
-    section[data-testid="stSidebar"] {
-        top: 0;
-    }
-
-    /* Reduce top padding aggressively */
-    div[data-testid="stVerticalBlock"] > div:first-child {
-        padding-top: 0 !important;
+        zoom: 0.85;
     }
 
     .main-header {
-        font-size: 1.8rem;
+        font-size: 1.5rem;
         font-weight: bold;
         color: #1f77b4;
-        margin-bottom: 0.3rem;
-        margin-top: 0 !important;
-        padding-top: 0 !important;
+        margin-bottom: 0.2rem;
     }
 
-    /* Target first element to remove top space */
-    .main .block-container > div:first-child {
-        padding-top: 0 !important;
-        margin-top: 0 !important;
-    }
-
-    /* Tighter spacing for all elements */
+    /* Very tight spacing for single-page view */
     .element-container {
-        margin-bottom: 0.5rem !important;
+        margin-bottom: 0.3rem !important;
     }
 
     /* Compact form elements */
     .stTextInput > label, .stDateInput > label, .stSelectbox > label {
-        font-size: 0.85rem !important;
-        margin-bottom: 0.2rem !important;
+        font-size: 0.75rem !important;
+        margin-bottom: 0.1rem !important;
     }
 
     .stTextInput > div > div > input,
     .stDateInput > div > div > input,
     .stSelectbox > div > div {
-        font-size: 0.9rem !important;
-        padding: 0.3rem 0.5rem !important;
+        font-size: 0.8rem !important;
+        padding: 0.25rem 0.4rem !important;
     }
 
     /* Compact buttons */
     .stButton > button {
-        font-size: 0.9rem !important;
-        padding: 0.35rem 0.75rem !important;
+        font-size: 0.8rem !important;
+        padding: 0.3rem 0.6rem !important;
     }
 
     /* Compact expanders */
     .streamlit-expanderHeader {
-        font-size: 0.95rem !important;
-        padding: 0.5rem !important;
+        font-size: 0.85rem !important;
+        padding: 0.3rem !important;
     }
 
-    /* Compact metrics */
+    /* Smaller metrics */
     [data-testid="stMetricValue"] {
-        font-size: 1.2rem !important;
+        font-size: 1rem !important;
     }
 
     [data-testid="stMetricLabel"] {
-        font-size: 0.85rem !important;
+        font-size: 0.7rem !important;
     }
 
-    /* Reduce heading sizes */
+    /* Smaller heading sizes for zoom-out effect */
     h1 {
-        font-size: 1.8rem !important;
-        margin-bottom: 0.5rem !important;
+        font-size: 1.4rem !important;
+        margin-bottom: 0.3rem !important;
+        margin-top: 0.3rem !important;
     }
 
     h2 {
-        font-size: 1.4rem !important;
-        margin-bottom: 0.4rem !important;
-        margin-top: 0.8rem !important;
+        font-size: 1.1rem !important;
+        margin-bottom: 0.2rem !important;
+        margin-top: 0.4rem !important;
     }
 
     h3 {
-        font-size: 1.1rem !important;
-        margin-bottom: 0.3rem !important;
-        margin-top: 0.6rem !important;
+        font-size: 0.95rem !important;
+        margin-bottom: 0.2rem !important;
+        margin-top: 0.3rem !important;
     }
 
-    /* Tighter dividers */
+    /* Minimal dividers */
     hr {
-        margin: 0.5rem 0 !important;
+        margin: 0.3rem 0 !important;
     }
 
     .metric-card {
         background-color: #f0f2f6;
-        padding: 0.75rem;
-        border-radius: 0.5rem;
-        margin: 0.3rem 0;
+        padding: 0.4rem;
+        border-radius: 0.3rem;
+        margin: 0.2rem 0;
     }
 
     .basket-card {
         background-color: #ffffff;
-        border: 2px solid #e0e0e0;
-        border-radius: 0.5rem;
-        padding: 0.75rem;
-        margin: 0.3rem 0;
+        border: 1px solid #e0e0e0;
+        border-radius: 0.3rem;
+        padding: 0.4rem;
+        margin: 0.2rem 0;
     }
 
     /* Make date input more compact */
@@ -546,8 +526,8 @@ def save_load_configs():
 def main():
     """Main dashboard application."""
 
-    # Header - with negative margin to reduce top space
-    st.markdown('<div style="margin-top: -4rem;"><p class="main-header" style="margin-top: 0; padding-top: 0;">📈 Stock Portfolio Tracker</p></div>', unsafe_allow_html=True)
+    # Header
+    st.markdown('<p class="main-header">📈 Stock Portfolio Tracker</p>', unsafe_allow_html=True)
     st.markdown("Interactive dashboard for portfolio analysis with basket rebalancing")
 
     # Sidebar

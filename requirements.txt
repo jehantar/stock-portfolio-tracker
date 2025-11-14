@@ -1,5 +1,5 @@
 Nasdaq-Data-Link
-pandas==2.0.0
+pandas>=2.2.0
 matplotlib==3.7.0
 python-dotenv==1.0.0
 pandas-datareader==0.10.0

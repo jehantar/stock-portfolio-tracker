@@ -474,53 +474,50 @@ def basket_editor():
 
 
 def save_load_configs():
-    """Save and load configuration management."""
+    """Save and load configuration management with cloud-compatible download/upload."""
     st.sidebar.markdown("---")
     st.sidebar.subheader("💾 Configuration Management")
 
-    # Save configuration
-    save_name = st.sidebar.text_input("Config Name", value="my_portfolio")
+    # Download current configuration
+    if st.session_state.config:
+        config_yaml = yaml.dump(st.session_state.config.to_dict(), default_flow_style=False)
+        save_name = st.sidebar.text_input("Config Name", value="my_portfolio")
 
-    col1, col2 = st.sidebar.columns(2)
+        st.sidebar.download_button(
+            label="📥 Download Config",
+            data=config_yaml,
+            file_name=f"{save_name}.yaml",
+            mime="application/x-yaml",
+            help="Download configuration to save locally on your computer"
+        )
 
-    with col1:
-        if st.button("💾 Save"):
-            if st.session_state.config:
-                filename = f"{save_name}.yaml"
-                with open(filename, 'w') as f:
-                    yaml.dump(st.session_state.config.to_dict(), f, default_flow_style=False)
-                st.sidebar.success(f"Saved to {filename}")
-                st.rerun()
-            else:
-                st.sidebar.error("No configuration to save")
+    # Upload configuration
+    uploaded_file = st.sidebar.file_uploader(
+        "📤 Upload Config",
+        type=['yaml', 'yml'],
+        help="Upload a previously saved configuration file"
+    )
 
-    with col2:
-        if st.button("🔄 New"):
-            st.session_state.config = PortfolioConfig(
-                baskets=[Basket(tickers=['AAPL'], start_date=datetime.now().strftime('%Y-%m-%d'))],
-                end_date=datetime.now().strftime('%Y-%m-%d')
-            )
-            st.session_state.prices_df = None
+    if uploaded_file is not None:
+        try:
+            data = yaml.safe_load(uploaded_file)
+            st.session_state.config = PortfolioConfig.from_dict(data)
+            st.session_state.prices_df = None  # Reset cached data
             st.session_state.portfolio_returns = None
+            st.sidebar.success(f"✅ Loaded {uploaded_file.name}")
             st.rerun()
+        except Exception as e:
+            st.sidebar.error(f"❌ Error loading config: {e}")
 
-    # Load configuration
-    yaml_files = load_yaml_configs()
-    if yaml_files:
-        selected_file = st.sidebar.selectbox("Load Configuration", [""] + yaml_files)
-
-        if selected_file:
-            if st.sidebar.button("📂 Load"):
-                try:
-                    with open(selected_file, 'r') as f:
-                        data = yaml.safe_load(f)
-                    st.session_state.config = PortfolioConfig.from_dict(data)
-                    st.session_state.prices_df = None  # Reset cached data
-                    st.session_state.portfolio_returns = None
-                    st.sidebar.success(f"Loaded {selected_file}")
-                    st.rerun()
-                except Exception as e:
-                    st.sidebar.error(f"Error loading config: {e}")
+    # New configuration button
+    if st.sidebar.button("🔄 New Config", help="Start fresh with a new configuration"):
+        st.session_state.config = PortfolioConfig(
+            baskets=[Basket(tickers=['AAPL'], start_date=datetime.now().strftime('%Y-%m-%d'))],
+            end_date=datetime.now().strftime('%Y-%m-%d')
+        )
+        st.session_state.prices_df = None
+        st.session_state.portfolio_returns = None
+        st.rerun()
 
 
 def main():

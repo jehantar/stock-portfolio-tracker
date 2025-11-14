@@ -86,6 +86,25 @@ Click on **"Manage app"** → **Logs** to see real-time application logs and deb
 - View the logs to see specific error messages
 - Ensure all dependencies are in `requirements.txt`
 
+**Secrets.toml syntax error:**
+If you see "Invalid date or number on line 1", ensure your secrets are properly formatted:
+```toml
+# ✅ CORRECT - strings must be in quotes
+NASDAQ_DATA_LINK_API_KEY = "your_key_here"
+FRED_API_KEY = "your_key_here"
+
+# ❌ WRONG - missing quotes
+NASDAQ_DATA_LINK_API_KEY = your_key_here
+
+# ❌ WRONG - values that look like dates need quotes
+TOKEN = 2025-11-14  # Wrong!
+TOKEN = "2025-11-14"  # Correct!
+```
+
+**Python 3.13 compatibility issues:**
+- `pandas-datareader>=0.10.1` is required (0.10.0 has distutils dependency)
+- The requirements.txt has been updated to handle this
+
 **API errors:**
 - Verify your NASDAQ API key is valid at [data.nasdaq.com](https://data.nasdaq.com)
 - Check you haven't exceeded your API rate limits

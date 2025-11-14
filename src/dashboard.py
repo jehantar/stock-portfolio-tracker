@@ -384,16 +384,6 @@ def create_returns_distribution(portfolio_df: pd.DataFrame) -> go.Figure:
     return fig
 
 
-def load_yaml_configs() -> List[str]:
-    """Load all YAML config files in the current directory."""
-    configs = []
-    for file in os.listdir('.'):
-        if file.endswith('.yaml') or file.endswith('.yml'):
-            if file not in ['portfolio_config.example.yaml']:
-                configs.append(file)
-    return sorted(configs)
-
-
 def basket_editor():
     """Interactive basket editor component."""
     st.subheader("Portfolio Configuration")
@@ -688,29 +678,30 @@ def show_single_portfolio(nasdaq_key: str, fred_key: str):
 
 
 def show_portfolio_comparison(nasdaq_key: str, fred_key: str):
-    """Show portfolio comparison view."""
+    """Show portfolio comparison view with cloud-compatible file upload."""
 
     st.subheader("📊 Portfolio Comparison")
 
-    # Select portfolios to compare
-    yaml_files = load_yaml_configs()
+    st.info("Upload 2-5 portfolio configuration files (.yaml) to compare their performance side-by-side.")
 
-    if not yaml_files:
-        st.warning("No saved portfolio configurations found. Please create and save portfolios first.")
-        return
-
-    selected_files = st.multiselect(
-        "Select portfolios to compare (2-5 portfolios)",
-        yaml_files,
-        default=yaml_files[:min(2, len(yaml_files))]
+    # File uploader for multiple configs
+    uploaded_files = st.file_uploader(
+        "Upload Portfolio Configurations",
+        type=['yaml', 'yml'],
+        accept_multiple_files=True,
+        help="Select 2-5 portfolio configuration files to compare"
     )
 
-    if len(selected_files) < 2:
-        st.info("Please select at least 2 portfolios to compare")
+    if not uploaded_files:
+        st.info("Please upload at least 2 portfolio configuration files to compare")
         return
 
-    if len(selected_files) > 5:
-        st.warning("Please select at most 5 portfolios for better visualization")
+    if len(uploaded_files) < 2:
+        st.warning(f"You've uploaded {len(uploaded_files)} file(s). Please upload at least 2 portfolios to compare.")
+        return
+
+    if len(uploaded_files) > 5:
+        st.warning(f"You've uploaded {len(uploaded_files)} files. Please upload at most 5 portfolios for better visualization.")
         return
 
     # Run comparison
@@ -722,17 +713,19 @@ def show_portfolio_comparison(nasdaq_key: str, fred_key: str):
                 min_start_date = None
                 max_end_date = None
 
-                # Load all configs
-                for config_file in selected_files:
-                    with open(config_file, 'r') as f:
-                        data = yaml.safe_load(f)
+                # Load all configs from uploaded files
+                for uploaded_file in uploaded_files:
+                    data = yaml.safe_load(uploaded_file)
+                    if data is None:
+                        st.error(f"❌ Error: {uploaded_file.name} is empty or invalid")
+                        return
                     config = PortfolioConfig.from_dict(data)
-                    name = config_file.replace('.yaml', '').replace('_', ' ').title()
+                    name = uploaded_file.name.replace('.yaml', '').replace('.yml', '').replace('_', ' ').title()
 
                     portfolios.append({
                         'name': name,
                         'config': config,
-                        'file': config_file
+                        'file': uploaded_file.name
                     })
 
                     # Collect tickers and dates
